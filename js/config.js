@@ -3,7 +3,7 @@
  */
 
 export const APP_NAME = 'Spark Lab';
-export const APP_VERSION = '1.0.0-build1';
+export const APP_VERSION = '1.5.0-build1.5';
 export const STORAGE_KEY = 'sparklab.v1';
 export const SCHEMA_VERSION = 1;
 
@@ -67,3 +67,9 @@ export const LEVEL_TAGS = {
 };
 
 export const HIGHLIGHT_COLORS = ['green', 'pink', 'yellow'];
+
+/** Google accounts that have the parent role (can view linked learners and manage rewards). */
+export const PARENT_EMAILS = ['ivantheservant@gmail.com', 'luciaivan@gmail.com'];
+
+/** Delay before local changes are saved to the cloud (ms). */
+export const CLOUD_SAVE_DELAY = 4000;

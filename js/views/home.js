@@ -9,7 +9,7 @@ import { allChapters, getLesson, funFacts } from '../core/content.js';
 import { chapterProgress, nextLessonId, lessonsDoneCount } from '../core/progress.js';
 import { levelInfo, liveStreak } from '../core/xp.js';
 import { dueCount } from '../core/srs.js';
-import { condProgress } from '../core/rewards.js';
+import { condProgress, rewardList } from '../core/rewards.js';
 import { badgeList } from '../core/achievements.js';
 import { ohmieTip, ring, goalStatus } from '../ui/shell.js';
 import { dayKey } from '../utils/date.js';
@@ -84,7 +84,7 @@ export function homeView(view) {
   const lv = levelInfo(s.xp.total);
   const due = dueCount();
   const mistakes = Object.keys(s.mistakes).length;
-  const rewards = s.rewards.items.filter((r) => r.status !== 'claimed').slice(0, 2);
+  const rewards = rewardList().filter((r) => r.status !== 'claimed').slice(0, 2);
   const facts = funFacts();
   const fact = facts.length ? facts[hashDay(dayKey()) % facts.length] : null;
   const badges = badgeList().filter((b) => s.badges[b.id]).sort((a, b) => s.badges[b.id] - s.badges[a.id]).slice(0, 4);

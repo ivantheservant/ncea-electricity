@@ -4,6 +4,7 @@
 import { getState, commit, emit } from './store.js';
 import { readyChapters, allSimIds } from './content.js';
 import { lessonsDoneCount, isChapterComplete, testsAtGrade } from './progress.js';
+import { rewardList } from './rewards.js';
 
 /**
  * Build the badge list. Chapter badges are generated from the ready chapters.
@@ -44,7 +45,7 @@ export function badgeList() {
     { id: 'facts-10', icon: '💡', name: 'Trivia buff', desc: 'Reveal 10 fun facts.', group: 'Explore', test: (s) => Object.keys(s.facts).length >= 10 },
     { id: 'explorer', icon: '🧭', name: 'Explorer', desc: 'Open the glossary and the formula sheet.', group: 'Explore', test: (s) => s.visited.glossary && s.visited.formulas },
     { id: 'backup', icon: '💾', name: 'Safe keeper', desc: 'Back up your progress.', group: 'Explore', test: (s) => !!s.lastBackup },
-    { id: 'reward-1', icon: '🎁', name: 'Treat time', desc: 'Have a reward claimed.', group: 'Rewards', test: (s) => s.rewards.items.some((r) => r.status === 'claimed') },
+    { id: 'reward-1', icon: '🎁', name: 'Treat time', desc: 'Have a reward claimed.', group: 'Rewards', test: (s) => rewardList(s).some((r) => r.status === 'claimed') },
   ];
   for (const ch of readyChapters()) {
     list.push({ id: `chapter-${ch.id}`, icon: ch.icon || '⭐', name: `Chapter ${ch.num} complete`, desc: `Finish every lesson in ${ch.title}.`, group: 'Chapters', test: () => isChapterComplete(ch.id) });

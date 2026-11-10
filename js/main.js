@@ -3,7 +3,7 @@
  */
 import { load, onEvent, getState } from './core/store.js';
 import { initContent } from './core/content.js';
-import { route, fallback, startRouter, resolve } from './core/router.js';
+import { route, fallback, startRouter, resolve, current } from './core/router.js';
 import { checkAchievements } from './core/achievements.js';
 import { evaluateRewards } from './core/rewards.js';
 import { renderShell, updateTopbar, wireCelebrations, toast } from './ui/shell.js';
@@ -17,6 +17,8 @@ import { searchView } from './views/search.js';
 import { meView } from './views/me.js';
 import { rewardsView } from './views/rewards.js';
 import { settingsView, applyPrefs, welcome } from './views/settings.js';
+import { familyView } from './views/family.js';
+import { initCloud } from './core/cloud.js';
 
 let cleanup = () => {};
 
@@ -63,6 +65,7 @@ function routes() {
   route('/me', () => show(meView));
   route('/rewards', () => show(rewardsView));
   route('/settings', () => show(settingsView));
+  route('/family', () => show(familyView));
   fallback(() => { location.hash = '#/home'; });
 }
 
@@ -94,6 +97,37 @@ function registerSW() {
   }).catch((err) => console.warn('Service worker not registered', err));
 }
 
+const BUSY = ['/lesson', '/test', '/flashcards', '/practice', '/mistakes'];
+
+/**
+ * Redraw the current page after sign-in or a sync, unless the learner is in the middle of
+ * a lesson, test or review session (then only the top bar updates).
+ * @param {string[]} [only] Redraw only when the current path starts with one of these.
+ * @returns {void}
+ */
+function refreshView(only) {
+  const path = current().path;
+  if (BUSY.some((b) => path.startsWith(b)) || (only && !only.some((o) => path.startsWith(o)))) { updateTopbar(); return; }
+  resolve();
+}
+
+/**
+ * Connect cloud sync events to the app.
+ * @returns {void}
+ */
+function wireCloud() {
+  let lastErr = 0;
+  onEvent('auth', () => { checkAchievements(); evaluateRewards(); refreshView(); });
+  onEvent('synced', () => { applyPrefs(); checkAchievements(); evaluateRewards(); refreshView(); });
+  onEvent('family', () => { evaluateRewards(); refreshView(['/home', '/rewards', '/notes', '/me']); });
+  onEvent('cloud-error', () => {
+    if (Date.now() - lastErr < 120000) return;
+    lastErr = Date.now();
+    toast('Could not reach your Google account. Your progress is still saved on this device and will sync later.', { kind: 'bad', ms: 5000 });
+  });
+  initCloud();
+}
+
 /**
  * Start the app.
  * @returns {Promise<void>}
@@ -120,6 +154,7 @@ async function boot() {
   checkAchievements();
   evaluateRewards();
   registerSW();
+  wireCloud();
   const isNew = !getState().profile.onboarded;
   await welcome();
   if (isNew) resolve();

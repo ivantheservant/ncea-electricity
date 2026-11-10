@@ -32,6 +32,7 @@ export function freshState() {
     lastLesson: null,
     lastBackup: null,
     visited: {},
+    rewardsSeen: {},
   };
 }
 
@@ -212,6 +213,19 @@ export async function readTransferCode(code) {
     if (err.message.startsWith('That')) throw err;
     throw new Error('The code is incomplete or damaged. Copy the whole code again and paste it here.');
   }
+}
+
+/**
+ * Replace the whole state (used after merging with the cloud copy).
+ * @param {object} next New state.
+ * @param {string} [what='replace'] Reason passed to listeners.
+ * @returns {object} The new live state.
+ */
+export function replaceState(next, what = 'replace') {
+  state = merge(freshState(), next);
+  saveNow();
+  emit('change', what);
+  return state;
 }
 
 /**

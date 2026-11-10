@@ -5,9 +5,9 @@
  */
 import { getState, commit, emit } from './store.js';
 import { uid } from '../utils/dom.js';
-import { lessonsDoneCount, isChapterComplete } from './progress.js';
 import { getChapter } from './content.js';
 import { checkAchievements } from './achievements.js';
+import { cloudEnabled, currentUser, familyData } from './cloud.js';
 
 export const COND_TYPES = {
   xp: { label: 'Reach a total XP', unit: 'XP' },
@@ -78,32 +78,58 @@ export function clearPin() {
 }
 
 /**
- * Current value and target for a condition.
+ * Current value and target for a condition, measured on any learner's state.
  * @param {{type:string, target?:number, chapter?:string, grade?:string}} c Condition.
+ * @param {object} [s] Learner state (defaults to this device's learner).
  * @returns {{value:number, target:number, pct:number, text:string}} Progress.
  */
-export function condProgress(c) {
-  const s = getState();
+export function condProgress(c, s = getState()) {
   const rank = { N: 0, A: 1, M: 2, E: 3 };
   const gname = { A: 'Achieved', M: 'Merit', E: 'Excellence' };
+  const lessons = s.lessons || {};
   switch (c.type) {
-    case 'xp': return mk(s.xp.total, c.target, `${s.xp.total} / ${c.target} XP`);
-    case 'lessons': { const v = lessonsDoneCount(); return mk(v, c.target, `${v} / ${c.target} lessons`); }
-    case 'streak': return mk(s.streak.best, c.target, `Best streak ${s.streak.best} / ${c.target} days`);
-    case 'badges': { const v = Object.keys(s.badges).length; return mk(v, c.target, `${v} / ${c.target} badges`); }
+    case 'xp': return mk(s.xp?.total || 0, c.target, `${s.xp?.total || 0} / ${c.target} XP`);
+    case 'lessons': { const v = Object.values(lessons).filter((l) => l.done).length; return mk(v, c.target, `${v} / ${c.target} lessons`); }
+    case 'streak': return mk(s.streak?.best || 0, c.target, `Best streak ${s.streak?.best || 0} / ${c.target} days`);
+    case 'badges': { const v = Object.keys(s.badges || {}).length; return mk(v, c.target, `${v} / ${c.target} badges`); }
     case 'chapter': {
       const ch = getChapter(c.chapter);
       const total = ch?.lessons?.length || 1;
-      const done = (ch?.lessons || []).filter((l) => s.lessons[l.id]?.done).length;
-      return mk(isChapterComplete(c.chapter) ? total : done, total, `Chapter ${ch?.num ?? '?'}: ${done} / ${total} lessons`);
+      const done = (ch?.lessons || []).filter((l) => lessons[l.id]?.done).length;
+      return mk(done, total, `Chapter ${ch?.num ?? '?'}: ${done} / ${total} lessons`);
     }
     case 'test': {
-      const best = s.tests[c.chapter]?.best?.grade || 'N';
+      const best = s.tests?.[c.chapter]?.best?.grade || 'N';
       const ch = getChapter(c.chapter);
       return mk(rank[best], rank[c.grade], `Chapter ${ch?.num ?? '?'} test: best ${best === 'N' ? 'not yet' : gname[best]}, need ${gname[c.grade]}`);
     }
     default: return mk(0, 1, '');
   }
+}
+
+/**
+ * Whether rewards come from parents' accounts (signed in with cloud sync).
+ * @returns {boolean} True in cloud mode.
+ */
+export function cloudRewards() {
+  return cloudEnabled() && !!currentUser();
+}
+
+/**
+ * Rewards for a learner with live status. In cloud mode they come from the parents' family
+ * document; otherwise from this device's PIN-protected board.
+ * @param {object} [s] Learner state.
+ * @param {{rewards:object[]}} [fam] Family data (cloud mode).
+ * @param {boolean} [cloud] Force cloud mode on/off.
+ * @returns {object[]} Rewards with status 'locked' | 'unlocked' | 'claimed'.
+ */
+export function rewardList(s = getState(), fam = familyData(), cloud = cloudRewards()) {
+  if (!cloud) return s.rewards.items;
+  return (fam.rewards || []).map((r) => {
+    const p = condProgress(r.cond, s);
+    const met = p.target > 0 && p.value >= p.target;
+    return { ...r, status: r.claimedAt ? 'claimed' : met ? 'unlocked' : 'locked', unlockedAt: met ? (s.rewardsSeen?.[r.id] || Date.now()) : null };
+  });
 }
 
 /**
@@ -175,19 +201,26 @@ export function claimReward(id) {
 }
 
 /**
- * Unlock rewards whose conditions are met. Emits 'reward' for each new unlock.
+ * Unlock rewards whose conditions are met. Emits 'reward' once per newly unlocked reward.
  * @returns {object[]} Newly unlocked rewards.
  */
 export function evaluateRewards() {
-  const items = getState().rewards.items;
+  const s = getState();
   const fresh = [];
-  for (const it of items) {
-    if (it.status !== 'locked') continue;
-    const p = condProgress(it.cond);
-    if (p.value >= p.target && p.target > 0) {
-      it.status = 'unlocked';
-      it.unlockedAt = Date.now();
-      fresh.push(it);
+  if (cloudRewards()) {
+    s.rewardsSeen = s.rewardsSeen || {};
+    for (const it of rewardList(s)) {
+      if (it.status === 'unlocked' && !s.rewardsSeen[it.id]) { s.rewardsSeen[it.id] = Date.now(); fresh.push(it); }
+    }
+  } else {
+    for (const it of s.rewards.items) {
+      if (it.status !== 'locked') continue;
+      const p = condProgress(it.cond, s);
+      if (p.value >= p.target && p.target > 0) {
+        it.status = 'unlocked';
+        it.unlockedAt = Date.now();
+        fresh.push(it);
+      }
     }
   }
   if (fresh.length) {

@@ -5,13 +5,14 @@ import { esc, $, $$, reducedMotion } from '../utils/dom.js';
 import { getState, onEvent } from '../core/store.js';
 import { levelInfo, liveStreak, todayXP } from '../core/xp.js';
 import { current } from '../core/router.js';
+import { cloudEnabled, cloudReady, currentUser, signIn } from '../core/cloud.js';
 
 const NAV = [
   { href: '#/home', label: 'Home', icon: 'home', match: ['/home'] },
   { href: '#/learn', label: 'Learn', icon: 'learn', match: ['/learn', '/chapter', '/lesson', '/test'] },
   { href: '#/review', label: 'Review', icon: 'review', match: ['/review', '/flashcards', '/mistakes', '/practice', '/formulas', '/glossary'] },
   { href: '#/notes', label: 'Notes', icon: 'notes', match: ['/notes'] },
-  { href: '#/me', label: 'Me', icon: 'me', match: ['/me', '/rewards', '/settings'] },
+  { href: '#/me', label: 'Me', icon: 'me', match: ['/me', '/rewards', '/settings', '/family'] },
 ];
 
 const ICONS = {
@@ -22,6 +23,8 @@ const ICONS = {
   me: '<circle cx="12" cy="8.5" r="3.5"/><path d="M5 20c1.2-3.6 4-5.3 7-5.3s5.8 1.7 7 5.3"/>',
   search: '<circle cx="11" cy="11" r="6"/><path d="m16 16 4 4"/>',
   settings: '<circle cx="12" cy="12" r="3"/><path d="M12 3v2.5M12 18.5V21M3 12h2.5M18.5 12H21M5.6 5.6l1.8 1.8M16.6 16.6l1.8 1.8M5.6 18.4l1.8-1.8M16.6 7.4l1.8-1.8"/>',
+  family: '<circle cx="8.5" cy="8" r="2.8"/><circle cx="16" cy="9.5" r="2.2"/><path d="M3.5 19c.8-3.4 2.8-5.2 5-5.2s4.2 1.8 5 5.2M13.2 15.2c.8-1 1.8-1.5 2.8-1.5 2 0 3.6 1.6 4.2 4.6"/>',
+  signin: '<path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4"/><path d="M10 8l4 4-4 4M14 12H4"/>',
   gift: '<rect x="4" y="9" width="16" height="11" rx="1.5"/><path d="M12 9v11M4 13h16"/><path d="M12 9c-1.5-3-5-3.5-5-1.2C7 9 9.5 9 12 9zm0 0c1.5-3 5-3.5 5-1.2C17 9 14.5 9 12 9z"/>',
 };
 
@@ -79,10 +82,12 @@ export function renderShell() {
       </div>
       <a class="iconbtn" href="#/search" aria-label="Search">${icon('search')}</a>
       <a class="iconbtn hide-sm" href="#/settings" aria-label="Settings">${icon('settings')}</a>
+      <span class="acct-slot"></span>
     </header>
     <nav class="nav" aria-label="Main">
       ${NAV.map((n) => `<a href="${n.href}" data-nav="${n.href}">${icon(n.icon)}<span>${n.label}</span></a>`).join('')}
       <a href="#/rewards" class="rail-only" data-nav="#/rewards">${icon('gift')}<span>Rewards</span></a>
+      <a href="#/family" class="rail-only parent-only" data-nav="#/family" hidden>${icon('family')}<span>Family</span></a>
       <a href="#/settings" class="rail-only" data-nav="#/settings">${icon('settings')}<span>Settings</span></a>
     </nav>
     <main id="view" tabindex="-1"></main>
@@ -91,6 +96,46 @@ export function renderShell() {
     <div id="hl-bar" class="hl-bar" hidden></div>`;
   updateTopbar();
   onEvent('change', updateTopbar);
+  onEvent('auth', updateTopbar);
+  $('.acct-slot').addEventListener('click', async (e) => {
+    if (!e.target.closest('.acct-signin')) return;
+    try {
+      if (await signIn()) toast('Signed in. Your progress now saves to your Google account.', { kind: 'good', ms: 4000 });
+    } catch (err) {
+      toast(esc(err.message || 'Sign-in failed. Try again.'), { kind: 'bad', ms: 5000 });
+    }
+  });
+}
+
+/**
+ * Round profile picture (or initial) for a signed-in user.
+ * @param {{name?:string, email?:string, photo?:string}} u User.
+ * @param {number} [size=32] Size in pixels.
+ * @returns {string} HTML.
+ */
+export function avatar(u, size = 32) {
+  const initial = esc((u?.name || u?.email || '?').trim().charAt(0).toUpperCase());
+  const style = `width:${size}px;height:${size}px;font-size:${Math.round(size * 0.45)}px`;
+  const img = u?.photo ? `<img src="${esc(u.photo)}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">` : '';
+  return `<span class="avatar" style="${style}"><span aria-hidden="true">${initial}</span>${img}</span>`;
+}
+
+/**
+ * Render the account button in the top bar.
+ * @returns {void}
+ */
+function renderAccount() {
+  const slot = $('.acct-slot');
+  if (!slot) return;
+  const u = currentUser();
+  const key = !cloudEnabled() ? 'off' : !cloudReady() ? 'wait' : u ? `in:${u.uid}:${u.photo}` : 'out';
+  if (slot.dataset.key === key) return;
+  slot.dataset.key = key;
+  if (key === 'off' || key === 'wait') { slot.innerHTML = ''; return; }
+  slot.innerHTML = u
+    ? `<a class="acct-btn" href="#/settings" aria-label="Account: ${esc(u.email)}" title="${esc(u.email)}">${avatar(u, 30)}</a>`
+    : `<button type="button" class="acct-btn acct-signin" aria-label="Sign in with Google">${icon('signin')}<span class="acct-txt">Sign in</span></button>`;
+  $$('.parent-only').forEach((a) => { a.hidden = !u?.isParent; });
 }
 
 /**
@@ -114,6 +159,7 @@ export function updateTopbar() {
   set('.streak-n', String(liveStreak()));
   const fill = $('.xpfill');
   if (fill) fill.style.width = `${Math.round(lv.pct * 100)}%`;
+  renderAccount();
   const path = current().path;
   $$('.nav a').forEach((a) => {
     const item = NAV.find((n) => n.href === a.dataset.nav);

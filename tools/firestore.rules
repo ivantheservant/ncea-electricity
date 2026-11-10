@@ -1,0 +1,28 @@
+rules_version = '2';
+// Spark Lab — Firestore security rules.
+// users/{uid}:  each learner's own progress. Readable by the learner and by parents they share with.
+// family/{uid}: rewards and answers that parents set for a learner.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function myEmail() { return request.auth.token.email; }
+    function isParent() {
+      return signedIn() && request.auth.token.email_verified == true
+        && myEmail() in ['ivantheservant@gmail.com', 'luciaivan@gmail.com'];
+    }
+    function sharedWithMe(uid) {
+      return isParent() && myEmail() in get(/databases/$(database)/documents/users/$(uid)).data.parents;
+    }
+    match /users/{uid} {
+      allow read: if signedIn() && (request.auth.uid == uid || (isParent() && myEmail() in resource.data.parents));
+      allow create, update: if signedIn() && request.auth.uid == uid
+        && request.resource.data.parents is list && request.resource.data.parents.size() <= 4
+        && request.resource.data.stateJson is string && request.resource.data.stateJson.size() < 900000;
+      allow delete: if signedIn() && request.auth.uid == uid;
+    }
+    match /family/{uid} {
+      allow read: if signedIn() && (request.auth.uid == uid || sharedWithMe(uid));
+      allow write: if sharedWithMe(uid);
+    }
+  }
+}

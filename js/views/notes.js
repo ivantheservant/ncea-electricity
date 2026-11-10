@@ -7,6 +7,16 @@ import { getLesson } from '../core/content.js';
 import { removeHighlight, updateHighlight, toggleBookmark, updateQuestion, removeQuestion } from '../core/notes.js';
 import { shortDate } from '../utils/date.js';
 import { ohmieTip, toast, openModal, confirmBox } from '../ui/shell.js';
+import { familyData } from '../core/cloud.js';
+
+/**
+ * A parent's answer to a saved question (cloud mode), if any.
+ * @param {string} id Question id.
+ * @returns {{text:string, by:string, at:number}|null} Answer.
+ */
+function parentAnswer(id) {
+  return familyData().answers?.[id] || null;
+}
 
 /**
  * Notes page.
@@ -113,11 +123,12 @@ function questionsHTML() {
   const qs = getState().questions.slice().sort((a, b) => b.at - a.at);
   if (!qs.length) return ohmieTip('<p>Stuck on something? Select the confusing text in a lesson and tap <b>Ask</b>. Your questions collect here so you can take them to your teacher or parent.</p>', 'think');
   return `<div class="row"><button type="button" class="btn primary small share-q">Share my questions</button></div>
-    <ul class="q-list">${qs.map((q) => `<li class="q-card ${q.answered ? 'answered' : ''}"><p class="q-text">${esc(q.text)}</p>
+    <ul class="q-list">${qs.map((q) => { const pa = parentAnswer(q.id); return `<li class="q-card ${q.answered || pa ? 'answered' : ''}"><p class="q-text">${esc(q.text)}</p>
       ${q.context ? `<blockquote class="quote small">${esc(q.context)}</blockquote>` : ''}
-      ${q.answer ? `<p class="q-answer"><b>Answer:</b> ${esc(q.answer)}</p>` : ''}
+      ${pa ? `<p class="q-answer from-parent"><b>${esc(pa.by || 'Parent')} answered:</b> ${esc(pa.text)}</p>` : ''}
+      ${q.answer ? `<p class="q-answer"><b>${pa ? 'My notes' : 'Answer'}:</b> ${esc(q.answer)}</p>` : ''}
       <div class="hl-meta"><span>${q.lesson ? `<a href="#/lesson/${q.lesson}">${esc(lessonLabel(q.lesson))}</a>` : ''}</span><span>${shortDate(q.at)}</span>
-      <button type="button" class="linkbtn" data-ans="${q.id}">${q.answered ? 'Edit answer' : 'Mark answered'}</button><button type="button" class="linkbtn danger" data-delq="${q.id}">Delete</button></div></li>`).join('')}</ul>`;
+      <button type="button" class="linkbtn" data-ans="${q.id}">${q.answered ? 'Edit answer' : 'Mark answered'}</button><button type="button" class="linkbtn danger" data-delq="${q.id}">Delete</button></div></li>`; }).join('')}</ul>`;
 }
 
 /**
@@ -143,5 +154,5 @@ function notesMarkdown() {
  * @returns {string} Text.
  */
 function questionsText() {
-  return getState().questions.map((q, i) => `${i + 1}. ${q.text}${q.lesson ? ` (lesson ${lessonLabel(q.lesson)})` : ''}${q.context ? `\n   About: "${q.context}"` : ''}${q.answer ? `\n   Answer: ${q.answer}` : ''}`).join('\n');
+  return getState().questions.map((q, i) => `${i + 1}. ${q.text}${q.lesson ? ` (lesson ${lessonLabel(q.lesson)})` : ''}${q.context ? `\n   About: "${q.context}"` : ''}${parentAnswer(q.id) ? `\n   ${parentAnswer(q.id).by || 'Parent'} answered: ${parentAnswer(q.id).text}` : ''}${q.answer ? `\n   Answer: ${q.answer}` : ''}`).join('\n');
 }

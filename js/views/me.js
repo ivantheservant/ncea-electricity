@@ -10,6 +10,7 @@ import { lessonsDoneCount, avgCheckpoint } from '../core/progress.js';
 import { lessonOrder } from '../core/content.js';
 import { dayKey, addDays, shortDate } from '../utils/date.js';
 import { icon } from '../ui/shell.js';
+import { currentUser } from '../core/cloud.js';
 
 /**
  * Me page.
@@ -32,7 +33,7 @@ export function meView(view) {
       <div><h1>${esc(s.profile.name || 'Your progress')}</h1>
         <p class="lede">${esc(lv.name)} · ${s.xp.total} XP${lv.next ? ` · ${lv.toNext} XP to ${esc(lv.next.name)}` : ''}</p>
         <div class="bar lvl-bar"><span style="width:${Math.round(lv.pct * 100)}%"></span></div></div>
-      <div class="me-links"><a class="btn ghost small" href="#/rewards">${icon('gift')} Reward Board</a><a class="btn ghost small" href="#/settings">${icon('settings')} Settings</a></div>
+      <div class="me-links">${currentUser()?.isParent ? `<a class="btn primary small" href="#/family">${icon('family')} Family</a>` : ''}<a class="btn ghost small" href="#/rewards">${icon('gift')} Reward Board</a><a class="btn ghost small" href="#/settings">${icon('settings')} Settings</a></div>
     </header>
 
     <section class="stats-grid">

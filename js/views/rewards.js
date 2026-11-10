@@ -5,7 +5,7 @@
 import { $, esc, bindOnce } from '../utils/dom.js';
 import { getState } from '../core/store.js';
 import { readyChapters } from '../core/content.js';
-import { hasPin, setPin, verifyPin, clearPin, addReward, removeReward, claimReward, condProgress, condText, evaluateRewards, COND_TYPES } from '../core/rewards.js';
+import { hasPin, setPin, verifyPin, clearPin, addReward, removeReward, claimReward, condProgress, condText, evaluateRewards, COND_TYPES, cloudRewards, rewardList } from '../core/rewards.js';
 import { ohmieTip, openModal, toast, confirmBox, confetti } from '../ui/shell.js';
 import { shortDate } from '../utils/date.js';
 
@@ -56,6 +56,7 @@ async function unlock() {
  */
 export function rewardsView(view) {
   evaluateRewards();
+  if (cloudRewards()) return cloudRewardsView(view);
   const items = getState().rewards.items;
   const pm = parentMode();
   const order = { unlocked: 0, locked: 1, claimed: 2 };
@@ -101,10 +102,55 @@ export function rewardsView(view) {
 }
 
 /**
- * Dialog to add a reward.
+ * Add a reward to this device's board.
  * @returns {Promise<void>}
  */
 async function addDialog() {
+  const res = await rewardDialog();
+  if (res) { addReward(res); toast('Reward added.', { kind: 'good' }); }
+}
+
+/**
+ * Card list for rewards (shared by the learner and parent views).
+ * @param {object[]} list Rewards with status.
+ * @param {object} s Learner state used for progress.
+ * @param {boolean} manage Show parent buttons.
+ * @returns {string} HTML.
+ */
+export function rewardCards(list, s, manage) {
+  const order = { unlocked: 0, locked: 1, claimed: 2 };
+  return `<ul class="rw-list">${list.slice().sort((a, b) => order[a.status] - order[b.status]).map((r) => {
+    const p = condProgress(r.cond, s);
+    return `<li class="rw-card ${r.status}">
+        <span class="rw-ico">${r.status === 'claimed' ? '✅' : r.status === 'unlocked' ? '🎁' : '🔒'}</span>
+        <div class="rw-main"><b>${esc(r.title)}</b><span class="rw-cond">${esc(condText(r.cond))}</span>
+          ${r.status === 'locked' ? `<span class="bar"><span style="width:${Math.round(p.pct * 100)}%"></span></span><small>${esc(p.text)}</small>` : ''}
+          ${r.status === 'unlocked' ? '<small>Unlocked — waiting for a parent to hand it over.</small>' : ''}
+          ${r.status === 'claimed' ? `<small>Given ${shortDate(r.claimedAt)}</small>` : ''}</div>
+        ${manage ? `<div class="rw-actions">${r.status === 'unlocked' ? `<button type="button" class="btn primary small claim" data-id="${r.id}">Mark as given</button>` : ''}<button type="button" class="linkbtn danger del" data-id="${r.id}">Delete</button></div>` : ''}
+      </li>`;
+  }).join('')}</ul>`;
+}
+
+/**
+ * Learner view of rewards set by parents from their own accounts.
+ * @param {Element} view Main view.
+ * @returns {() => void} Cleanup.
+ */
+function cloudRewardsView(view) {
+  const list = rewardList();
+  view.innerHTML = `<div class="page narrow rewards"><header class="page-head"><h1>Reward Board</h1>
+    <p class="lede">Rewards your parents set from their own accounts. Reach the goal and the reward unlocks by itself.</p></header>
+    ${list.length ? rewardCards(list, getState(), false) : ohmieTip('<p>No rewards yet. Your parents can add them from their Family page.</p>')}</div>`;
+  window.scrollTo(0, 0);
+  return () => {};
+}
+
+/**
+ * Dialog to describe a reward.
+ * @returns {Promise<{title:string, cond:object}|null>} Reward details, or null if cancelled.
+ */
+export async function rewardDialog() {
   const chOpts = readyChapters().concat().map((c) => `<option value="${c.id}">Chapter ${c.num}: ${esc(c.title)}</option>`).join('');
   const res = await openModal({
     title: 'Add a reward',
@@ -140,5 +186,5 @@ async function addDialog() {
       },
     }],
   });
-  if (res) { addReward(res); toast('Reward added.', { kind: 'good' }); }
+  return res || null;
 }
