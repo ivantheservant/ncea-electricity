@@ -1,0 +1,159 @@
+/* lesson.css — lesson page, section types, diagrams and sims */
+
+.lesson { position: relative; max-width: 760px; }
+.lesson-head { display: grid; grid-template-columns: auto 1fr auto; gap: 14px; align-items: start; margin: 4px 0 18px; }
+.lnum { font-family: var(--hand); font-size: 1.9rem; line-height: 1; color: var(--margin); padding-top: 4px; min-width: 2.2ch; }
+.lesson-head h1 { display: inline; font-size: 1.95rem; background: linear-gradient(transparent 58%, var(--hl-green) 58%, var(--hl-green) 92%, transparent 92%); box-decoration-break: clone; -webkit-box-decoration-break: clone; padding: 0 3px; }
+.lesson-head .tags { margin-top: 10px; }
+@media (min-width: 900px) {
+  .lesson { padding-left: 64px; }
+  .lesson::before { content: ''; position: absolute; left: 44px; top: 0; bottom: 0; width: 2px; background: var(--margin); opacity: 0.55; }
+  .lesson-head { margin-left: -64px; grid-template-columns: 56px 1fr auto; }
+  .lnum { text-align: right; padding-right: 6px; }
+}
+.readbar { position: fixed; left: 0; right: 0; top: var(--top-h); height: 3px; z-index: 29; pointer-events: none; }
+.readbar span { display: block; height: 100%; width: 0; background: var(--hl-green); }
+.objectives { margin-bottom: 18px; padding: 14px 18px; border: 1.5px dashed var(--line); border-radius: var(--r-m); background: var(--sheet); }
+.objectives h2 { font-size: 1rem; color: var(--ink-2); margin-bottom: 6px; }
+.objectives ul { margin: 0; }
+.sec { margin: 0 0 22px; scroll-margin-top: calc(var(--top-h) + 12px); }
+.sec-head { display: flex; align-items: flex-start; gap: 8px; justify-content: space-between; }
+.sec-head h3 { font-size: 1.22rem; margin-bottom: 8px; }
+.sec-text .hl-zone { font-size: 1.04rem; }
+.sec-text .hl-zone > p, .sec-text .hl-zone li { max-width: 70ch; }
+.sec-tags { margin-top: -4px; }
+.bm-btn { flex: 0 0 auto; width: 36px; height: 36px; border-radius: 10px; border: 0; background: transparent; cursor: pointer; color: var(--ink-3); display: inline-grid; place-items: center; }
+.bm-btn .ico { width: 20px; height: 20px; }
+.bm-btn:hover { background: var(--sheet-2); color: var(--ink); }
+.bm-btn.on { color: var(--bad); }
+.bm-btn.on .ico { fill: var(--hl-pink); }
+.bm-btn.big { width: 44px; height: 44px; }
+.bm-btn.big .ico { width: 24px; height: 24px; }
+
+/* tables inside lessons */
+.hl-zone table, .symtab { width: 100%; border-collapse: collapse; margin: 6px 0 14px; font-size: 0.95rem; background: var(--sheet); border-radius: 10px; overflow: hidden; }
+.hl-zone th, .hl-zone td, .symtab th, .symtab td { padding: 7px 10px; border: 1px solid var(--line); text-align: left; vertical-align: top; }
+.hl-zone th, .symtab th { background: var(--sheet-2); font-weight: 700; }
+.tablewrap { overflow-x: auto; }
+
+/* section card types */
+.example { border-left: 5px solid var(--blue); }
+.ex-q { font-weight: 700; margin-bottom: 10px; }
+.ex-q p:last-child { margin-bottom: 4px; }
+.steps { margin: 0 0 10px; padding-left: 1.4em; }
+.steps li { margin-bottom: 8px; padding-left: 4px; }
+.steps li p:last-child { margin-bottom: 0; }
+.ex-ans { padding: 10px 14px; border-radius: 10px; background: var(--good-bg); font-weight: 700; }
+.ex-ans p:last-child { margin: 0; }
+.ex-ctrl { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.ex-prompt { width: 100%; margin: 0 0 4px; font-size: 0.9rem; color: var(--ink-3); }
+.mix { border-left: 5px solid var(--bad); }
+.mix-wrong, .mix-right { display: flex; gap: 10px; align-items: flex-start; }
+.mix-wrong .mk { color: var(--bad); font-weight: 700; }
+.mix-right .mk { color: var(--good); font-weight: 700; }
+.mix-wrong { color: var(--ink-2); text-decoration: line-through; text-decoration-color: color-mix(in srgb, var(--bad) 55%, transparent); text-decoration-thickness: 1.5px; }
+.maths { border-left: 5px solid var(--glow); }
+.exam { border-left: 5px solid var(--t-E); }
+.exam .std { font-weight: 700; color: var(--t-E); font-size: 0.92rem; }
+.key { background: var(--sheet); border: 2px solid var(--ink); box-shadow: 5px 5px 0 var(--hl-green); }
+.key ul { margin-bottom: 0; }
+.try { border: 2px dashed var(--blue); box-shadow: none; }
+.try .qcard { border: 0; box-shadow: none; padding: 0; }
+.formula .f-main { font-size: 1.25rem; text-align: center; margin: 4px 0 10px; overflow-x: auto; }
+.fact { border-radius: var(--r-m); border: 1.5px solid var(--glow); background: var(--sheet); overflow: hidden; }
+.fact-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 12px 16px; border: 0; background: color-mix(in srgb, var(--glow) 22%, var(--sheet)); text-align: left; cursor: pointer; font-weight: 700; }
+.fact-ico { font-size: 1.3rem; }
+.fact-body { padding: 12px 16px; }
+.fact-body p:last-child { margin: 0; }
+.fact.open .fact-btn { border-bottom: 1px solid var(--glow); }
+.deeper { border: 1.5px solid var(--line); border-radius: var(--r-m); background: var(--sheet); }
+.deeper summary { cursor: pointer; padding: 12px 16px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-weight: 700; list-style: none; }
+.deeper summary::-webkit-details-marker { display: none; }
+.deeper summary::after { content: '+'; margin-left: auto; font-size: 1.3rem; color: var(--ink-3); }
+.deeper[open] summary::after { content: '−'; }
+.deeper > .hl-zone { padding: 0 16px 14px; }
+.intro { margin-bottom: 8px; }
+.checkpoint { margin-top: 30px; padding-top: 18px; border-top: 2px solid var(--ink); }
+.cp-head h2 { font-size: 1.5rem; display: inline; background: linear-gradient(transparent 60%, var(--hl-yellow) 60%, var(--hl-yellow) 92%, transparent 92%); padding: 0 3px; }
+.cp-head p { margin-top: 10px; color: var(--ink-2); }
+.lesson-nav { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 30px; }
+.ln { display: grid; gap: 2px; padding: 12px 14px; border-radius: var(--r-m); background: var(--sheet); border: 1px solid var(--line); text-decoration: none; color: var(--ink); }
+.ln span { font-size: 0.8rem; color: var(--ink-3); font-weight: 700; }
+.ln.next { text-align: right; }
+.ln:hover { border-color: var(--ink-3); }
+
+/* ---------- diagrams (inline SVG) ---------- */
+figure { margin: 0; }
+.diagram, .sim { background: var(--sheet); border: 1px solid var(--line); border-radius: var(--r-m); padding: 14px; box-shadow: var(--shadow); }
+.diagram figcaption, .sim figcaption { margin-top: 8px; font-size: 0.92rem; color: var(--ink-2); }
+.diagram figcaption p, .sim figcaption p { margin: 0; }
+.dia { display: block; margin: 0 auto; width: 100%; height: auto; overflow: visible; font-family: var(--font); }
+.dia line, .dia polyline, .dia rect, .dia circle, .dia path, .dia polygon, .dia ellipse { stroke: var(--ink); stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.dia .thick { stroke-width: 4.5; stroke-linecap: butt; }
+.dia .solid, .dia .junction { fill: var(--ink); }
+.dia .arrowhead { fill: var(--ink); stroke: none; }
+.dia .meter { fill: var(--sheet); }
+.dia .bulb-off { fill: var(--sheet); }
+.dia .bulb-lit { fill: var(--glow); }
+.dia .halo { fill: var(--glow); stroke: none; filter: blur(3px); }
+.dia .hatch { fill: color-mix(in srgb, var(--bad) 18%, var(--sheet)); }
+.dia text { fill: var(--ink); stroke: none; font-size: 14px; }
+.dia .meter-letter { font-weight: 700; font-size: 14px; }
+.dia .sign { font-weight: 700; font-size: 15px; }
+.dia .lbl { font-size: 13.5px; }
+.dia .lbl.small { font-size: 12px; }
+.dia .lbl.bold, .dia .bold { font-weight: 700; }
+.dia .muted-t { fill: var(--ink-3); }
+.dia .flow polygon { fill: var(--blue); stroke: none; }
+.dia .flow.e polygon { fill: var(--bad); }
+.dia .arrow.accent { stroke: var(--blue); }
+.dia .arrowhead.accent { fill: var(--blue); }
+.dia .field { stroke: var(--ink-2); stroke-width: 1.5; }
+.dia .q circle { stroke-width: 1.5; }
+.dia .q-pos circle { fill: color-mix(in srgb, var(--bad) 22%, var(--sheet)); stroke: var(--bad); }
+.dia .q-pos line { stroke: var(--bad); stroke-width: 1.8; }
+.dia .q-neg circle { fill: color-mix(in srgb, var(--blue) 22%, var(--sheet)); stroke: var(--blue); }
+.dia .q-neg line { stroke: var(--blue); stroke-width: 1.8; }
+.dia .fill-sheet { fill: var(--sheet); }
+.dia .fill-soft { fill: var(--sheet-2); }
+.dia .fill-green { fill: var(--hl-green); }
+.dia .fill-pink { fill: var(--hl-pink); }
+.dia .fill-glow { fill: var(--glow); }
+.dia .nostroke { stroke: none; }
+.dia .dash { stroke-dasharray: 5 4; }
+.dia .thin { stroke-width: 1.2; }
+.dia .ion { fill: color-mix(in srgb, var(--bad) 14%, var(--sheet)); stroke: var(--bad); stroke-width: 1.5; }
+.dia .electron { fill: var(--blue); stroke: none; }
+.sym { max-width: 120px; }
+
+/* ---------- sims ---------- */
+.sim-mount { min-height: 60px; }
+.sim-ui { display: grid; gap: 12px; }
+.sim-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.sim-row label { display: flex; gap: 8px; align-items: center; font-weight: 700; font-size: 0.92rem; }
+.sim-row input[type="range"] { width: min(240px, 60vw); accent-color: var(--blue); }
+.sim-out { padding: 10px 14px; border-radius: 12px; background: var(--sheet-2); font-size: 0.98rem; }
+.sim-out b { font-size: 1.05rem; }
+.sim-big { font-size: 1.35rem; font-weight: 700; text-align: center; padding: 14px; border-radius: 12px; background: var(--sheet-2); }
+.sim-feedback { min-height: 1.6em; font-weight: 700; }
+.sim-feedback.ok { color: var(--good); }
+.sim-feedback.no { color: var(--bad); }
+.sim-score { font-weight: 700; color: var(--ink-2); }
+.tgl { min-height: 40px; padding: 6px 12px; border-radius: 10px; border: 1.5px solid var(--line); background: var(--sheet); cursor: pointer; font-weight: 700; }
+.tgl.on { border-color: var(--blue); background: var(--blue-2); }
+.sim canvas { width: 100%; height: auto; display: block; border-radius: 10px; background: var(--sheet-2); }
+.stepper-dots { display: flex; gap: 6px; justify-content: center; }
+.stepper-dots span { width: 9px; height: 9px; border-radius: 50%; background: var(--line); }
+.stepper-dots span.on { background: var(--ink); }
+.mat-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+.mat { min-height: 40px; padding: 6px 12px; border-radius: 10px; border: 1.5px solid var(--line); background: var(--sheet); cursor: pointer; font-weight: 700; }
+.mat.on { border-color: var(--ink); background: var(--hl-green); color: #1c2a4a; }
+.slot { cursor: pointer; }
+.slot rect { fill: var(--blue-2); stroke: var(--blue); stroke-dasharray: 4 3; }
+.slot:hover rect, .slot:focus-visible rect { fill: var(--hl-green); }
+.slot.picked rect { fill: var(--hl-green); stroke: var(--ink); stroke-dasharray: none; }
+.bulbtap { cursor: pointer; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+}
+.dia .hit { fill: transparent; stroke: none; }
