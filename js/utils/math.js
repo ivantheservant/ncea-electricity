@@ -118,3 +118,31 @@ export function randInt(lo, hi) {
 export function pick(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
 }
+
+const PREFIXES = [[1e6, 'M'], [1e3, 'k'], [1, ''], [1e-3, 'm'], [1e-6, 'μ'], [1e-9, 'n']];
+
+/**
+ * Format a value with an SI prefix, e.g. 0.0042 A → "4.20 mA".
+ * @param {number} x Value in base units.
+ * @param {string} unit Unit symbol (A, V, Ω, W…).
+ * @param {number} [sf=3] Significant figures.
+ * @returns {string} Formatted value.
+ */
+export function eng(x, unit, sf = 3) {
+  if (!Number.isFinite(x)) return `— ${unit}`;
+  if (x === 0) return `0 ${unit}`;
+  const a = Math.abs(x);
+  const [f, p] = PREFIXES.find(([m]) => a >= m * 0.9995) || PREFIXES[PREFIXES.length - 1];
+  return `${Number((x / f).toPrecision(sf))} ${p}${unit}`;
+}
+
+/**
+ * Format a number to n significant figures without trailing exponent noise.
+ * @param {number} x Value.
+ * @param {number} [sf=3] Significant figures.
+ * @returns {string} Formatted number.
+ */
+export function sig(x, sf = 3) {
+  if (!Number.isFinite(x)) return '—';
+  return String(Number(x.toPrecision(sf)));
+}

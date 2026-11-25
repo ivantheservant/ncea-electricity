@@ -5,8 +5,9 @@ Static site (HTML + ES modules), no build step. Works offline as an installable 
 
 ## Status
 - **Build 1**: platform engine + Chapter 0 (Maths Toolkit) and Chapters 1–3.
-- **Build 1.5** (this version): Google sign-in, cloud sync between devices, parent Family page.
-- Build 2: Chapters 4–7 · Build 3: Chapters 8–11 · Build 4: Chapters 12–15 + mock exams.
+- **Build 1.5**: Google sign-in, cloud sync between devices, parent Family page.
+- **Build 2** (this version): Chapters 4–7 (charge, current and voltage; resistance and Ohm’s law; series and parallel calculations; electrical power and energy) with 8 new interactives.
+- Build 3: Chapters 8–11 · Build 4: Chapters 12–15 + mock exams.
 
 ## Run locally
 ```

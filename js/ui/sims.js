@@ -23,6 +23,14 @@ const LOADERS = {
   'series-parallel': () => import('../sims/circuit-sims.js'),
   'meter-placement': () => import('../sims/circuit-sims.js'),
   'mixed-circuit': () => import('../sims/circuit-sims.js'),
+  'charge-flow': () => import('../sims/current-sims.js'),
+  'energy-lift': () => import('../sims/current-sims.js'),
+  'ohm-lab': () => import('../sims/ohm-sims.js'),
+  'sensor-lab': () => import('../sims/ohm-sims.js'),
+  'resistance-builder': () => import('../sims/network-sims.js'),
+  'circuit-solver': () => import('../sims/network-sims.js'),
+  'power-bill': () => import('../sims/power-sims.js'),
+  'circuit-load': () => import('../sims/power-sims.js'),
 };
 
 /**

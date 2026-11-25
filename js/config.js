@@ -3,7 +3,7 @@
  */
 
 export const APP_NAME = 'Spark Lab';
-export const APP_VERSION = '1.5.0-build1.5';
+export const APP_VERSION = '2.0.0-build2';
 export const STORAGE_KEY = 'sparklab.v1';
 export const SCHEMA_VERSION = 1;
 
