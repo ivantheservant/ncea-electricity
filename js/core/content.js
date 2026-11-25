@@ -9,6 +9,7 @@ const chapters = new Map();
 const lessons = new Map();
 const questions = new Map();
 let order = [];
+const mockIds = [];
 
 /**
  * Give every checkpoint and test question a stable id and a back-reference.
@@ -60,6 +61,20 @@ export async function initContent() {
     indexChapter(data);
   });
   order = ready.flatMap((c) => chapters.get(c.id).lessons.map((l) => l.id));
+  try {
+    const mocks = (await import('../../content/mocks.js')).default;
+    for (const m of mocks) { chapters.set(m.id, m); indexChapter(m); mockIds.push(m.id); }
+  } catch (err) {
+    console.warn('Mock exams could not load', err);
+  }
+}
+
+/**
+ * Mixed-topic practice exams (not part of the course map).
+ * @returns {object[]} Mock exam records.
+ */
+export function mockExams() {
+  return mockIds.map((id) => chapters.get(id));
 }
 
 /**

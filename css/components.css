@@ -403,3 +403,4 @@ select.is-wrong { border-color: var(--bad); background: var(--bad-bg); }
 @media (max-width: 370px) {
   .xpbar { display: none; }
 }
+.review .sec-title { margin: 28px 0 4px; font-size: 1.25rem; }

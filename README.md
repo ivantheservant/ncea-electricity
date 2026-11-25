@@ -7,8 +7,9 @@ Static site (HTML + ES modules), no build step. Works offline as an installable 
 - **Build 1**: platform engine + Chapter 0 (Maths Toolkit) and Chapters 1–3.
 - **Build 1.5**: Google sign-in, cloud sync between devices, parent Family page.
 - **Build 2**: Chapters 4–7 (charge, current and voltage; resistance and Ohm’s law; series and parallel calculations; electrical power and energy) with 8 new interactives.
-- **Build 3** (this version): Chapters 8–11 (DC, AC and transmission; electric fields; EMF, internal resistance and Kirchhoff’s laws; potential dividers and sensors) with 5 new interactives.
-- Build 4: Chapters 12–15 + mock exams.
+- **Build 3**: Chapters 8–11 (DC, AC and transmission; electric fields; EMF, internal resistance and Kirchhoff’s laws; potential dividers and sensors) with 5 new interactives.
+- **Build 4** (this version): Chapters 12–15 (magnetism, magnetic force and motors, electromagnetic induction and generators, transformers and the grid), 6 new interactives and 3 mixed-topic mock exams (content/mocks.js, shown on the Review page). Stage 1 complete.
+- Next: Stage 2 (NCEA Level 3 electrical systems) and Stage 3 (university bridge).
 
 ## Run locally
 ```
@@ -31,6 +32,7 @@ js/sims/                interactive simulations (loaded on demand)
 js/utils/               DOM, maths, dates, KaTeX, circuit-diagram SVG kit
 content/manifest.js     course map (all chapters; status 'ready' or 'soon')
 content/chXX.js         one file per chapter: lessons, checkpoints, tests, glossary, formulas
+content/mocks.js        mixed-topic mock exams (same test format, not on the course map)
 vendor/                 KaTeX and fonts (served locally so the app works offline)
 tools/build_sw.py       regenerates sw.js (offline cache list + version)
 ```

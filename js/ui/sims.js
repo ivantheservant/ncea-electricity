@@ -36,6 +36,12 @@ const LOADERS = {
   'field-plates': () => import('../sims/field-sims.js'),
   'emf-lab': () => import('../sims/divider-sims.js'),
   'divider-lab': () => import('../sims/divider-sims.js'),
+  'mag-field': () => import('../sims/magnet-sims.js'),
+  'force-lab': () => import('../sims/magnet-sims.js'),
+  'dc-motor': () => import('../sims/magnet-sims.js'),
+  'induction-lab': () => import('../sims/induction-sims.js'),
+  'ac-generator': () => import('../sims/induction-sims.js'),
+  'transformer-lab': () => import('../sims/induction-sims.js'),
 };
 
 /**

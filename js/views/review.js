@@ -5,7 +5,7 @@
 import { $, $$, esc, shuffle } from '../utils/dom.js';
 import { renderMath } from '../utils/tex.js';
 import { getState, commit } from '../core/store.js';
-import { readyChapters, getQuestion, practicePool, glossary, formulas, getChapter } from '../core/content.js';
+import { readyChapters, getQuestion, practicePool, glossary, formulas, getChapter, mockExams } from '../core/content.js';
 import { dueCards, review, mastery, allCards } from '../core/srs.js';
 import { mountQuiz } from '../core/quiz.js';
 import { startedChapterIds } from '../core/progress.js';
@@ -33,6 +33,9 @@ export function reviewView(view) {
       <a class="hub-card" href="#/glossary"><h2>Glossary</h2><p>Key words and exact definitions examiners look for.</p></a>
       <a class="hub-card" href="#/learn"><h2>Chapter tests</h2><p>Achieved, Merit and Excellence questions for each chapter.</p></a>
     </div>
+    <h2 class="sec-title">Mock exams</h2>
+    <p class="muted">Mixed-topic papers, like the real thing. Do them after finishing the chapters they cover.</p>
+    <div class="hub-grid">${mockExams().map((m) => { const b = s.tests[m.id]?.best; return `<a class="hub-card" href="#/test/${m.id}"><h2>${esc(m.title)}</h2><p>${esc(m.intro)}</p>${b ? `<p><span class="grade-tag g-${b.grade}">Best: ${({ N: 'Not yet', A: 'Achieved', M: 'Merit', E: 'Excellence' })[b.grade]}</span></p>` : ''}</a>`; }).join('')}</div>
   </div>`;
   window.scrollTo(0, 0);
   return () => {};

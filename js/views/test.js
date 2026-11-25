@@ -27,14 +27,16 @@ export function testView(view, id) {
   const nA = c.test.A?.length || 0;
   const nM = c.test.M?.length || 0;
   const nE = c.test.E?.length || 0;
+  const name = c.mock ? c.title : `Chapter ${c.num} test`;
+  const back = c.mock ? '#/review' : `#/chapter/${c.id}`;
 
   /** Intro screen. */
   function intro() {
     view.innerHTML = `
     <div class="page narrow test">
-      <nav class="crumbs"><a href="#/learn">Course</a><span>/</span><a href="#/chapter/${c.id}">Chapter ${c.num}</a></nav>
-      <h1>Chapter ${c.num} test</h1>
-      <p class="lede">${esc(c.title)}. Questions get harder as you go, like an NCEA paper: first Achieved, then Merit, then Excellence.</p>
+      <nav class="crumbs">${c.mock ? '<a href="#/review">Review</a><span>/</span><span>Mock exams</span>' : `<a href="#/learn">Course</a><span>/</span><a href="#/chapter/${c.id}">Chapter ${c.num}</a>`}</nav>
+      <h1>${esc(name)}</h1>
+      <p class="lede">${c.mock ? esc(c.intro) : esc(c.title) + '.'} Questions get harder as you go, like an NCEA paper: first Achieved, then Merit, then Excellence.</p>
       <div class="tier-cards">
         <div class="tier-card t-A"><b>Achieved</b><span>${nA} questions</span><small>Describe, identify, calculate in one step.</small></div>
         <div class="tier-card t-M"><b>Merit</b><span>${nM} questions</span><small>Explain why, link ideas, multi-step calculations.</small></div>
@@ -42,7 +44,7 @@ export function testView(view, id) {
       </div>
       ${ohmieTip('<p>One try per question, and you see the explanation straight after. For written answers, write your own first, then tick the points you really included. Be honest — it is your practice!</p>')}
       ${best ? `<p class="best-line">Best so far: <span class="grade-tag g-${best.grade}">${GRADE[best.grade]}</span></p>` : ''}
-      <div class="row"><button type="button" class="btn primary big start">Start the test</button><a class="btn ghost" href="#/chapter/${c.id}">Back</a></div>
+      <div class="row"><button type="button" class="btn primary big start">Start the test</button><a class="btn ghost" href="${back}">Back</a></div>
       <p class="muted small">The grade here is a practice guide only. Real NCEA papers are marked by examiners using the whole answer.</p>
     </div>`;
     $('.start', view).addEventListener('click', run);
@@ -51,7 +53,7 @@ export function testView(view, id) {
   /** Run the quiz. */
   function run() {
     const qs = [...shuffle(c.test.A || []), ...shuffle(c.test.M || []), ...(c.test.E || [])];
-    view.innerHTML = `<div class="page narrow test"><h1>Chapter ${c.num} test</h1><div class="test-mount"></div></div>`;
+    view.innerHTML = `<div class="page narrow test"><h1>${esc(name)}</h1><div class="test-mount"></div></div>`;
     quiz = mountQuiz($('.test-mount', view), qs, { mode: 'test', finishLabel: 'See my grade', onFinish: done });
     window.scrollTo(0, 0);
   }
@@ -83,7 +85,7 @@ export function testView(view, id) {
       <div class="grade-big g-${g}">${GRADE[g]}</div>
       <div class="tier-bars">${bars}</div>
       ${ohmieTip(`<p>${advice}</p>`, g === 'E' || g === 'M' ? 'wow' : 'think')}
-      <div class="row"><button type="button" class="btn primary again">Take the test again</button><a class="btn ghost" href="#/mistakes">Review mistakes</a><a class="btn ghost" href="#/chapter/${c.id}">Chapter overview</a></div>
+      <div class="row"><button type="button" class="btn primary again">Take the test again</button><a class="btn ghost" href="#/mistakes">Review mistakes</a><a class="btn ghost" href="${back}">${c.mock ? 'Back to Review' : 'Chapter overview'}</a></div>
     </div>`;
     $('.again', view).addEventListener('click', run);
     window.scrollTo(0, 0);
