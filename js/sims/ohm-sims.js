@@ -10,7 +10,7 @@ import { eng, sig } from '../utils/math.js';
  * @param {object} o Options: w, h, xmin, xmax, ymin, ymax, xl, yl, curve (fn), pts ([[x,y]]), mark ([x,y]), xTicks, yTicks, yFmt, xFmt, log (x log scale).
  * @returns {string} SVG element.
  */
-function plot(o) {
+export function plot(o) {
   const W = o.w || 360;
   const H = o.h || 240;
   const P = { l: 50, r: 16, t: 14, b: 40 };

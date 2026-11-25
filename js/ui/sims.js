@@ -31,6 +31,11 @@ const LOADERS = {
   'circuit-solver': () => import('../sims/network-sims.js'),
   'power-bill': () => import('../sims/power-sims.js'),
   'circuit-load': () => import('../sims/power-sims.js'),
+  'ac-scope': () => import('../sims/ac-sims.js'),
+  'grid-loss': () => import('../sims/ac-sims.js'),
+  'field-plates': () => import('../sims/field-sims.js'),
+  'emf-lab': () => import('../sims/divider-sims.js'),
+  'divider-lab': () => import('../sims/divider-sims.js'),
 };
 
 /**
